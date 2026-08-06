@@ -116,35 +116,41 @@ export const incomeService = {
   getIncome: () => handle405Fallback(
     () => api.get('/income'),
     () => {
-      const items = JSON.parse(localStorage.getItem('fp_income') || '[]');
+      let items = JSON.parse(localStorage.getItem('fp_income') || '[]');
       if (items.length === 0) {
-        const defaults = [
+        items = [
           { id: '1', source: 'Monthly Salary', amount: 5500, date: new Date().toISOString().slice(0, 10) },
           { id: '2', source: 'Freelancing Project', amount: 1200, date: new Date().toISOString().slice(0, 10) }
         ];
-        localStorage.setItem('fp_income', JSON.stringify(defaults));
-        return defaults;
+        localStorage.setItem('fp_income', JSON.stringify(items));
       }
-      return items;
+      return { success: true, count: items.length, data: items };
     }
   ),
   createIncome: (data) => handle405Fallback(
     () => api.post('/income', data),
     () => {
       const items = JSON.parse(localStorage.getItem('fp_income') || '[]');
-      const newItem = { id: 'inc-' + Date.now(), ...data, created_at: new Date().toISOString() };
+      const newItem = { id: 'inc-' + Date.now(), ...data, amount: parseFloat(data.amount), created_at: new Date().toISOString() };
       items.unshift(newItem);
       localStorage.setItem('fp_income', JSON.stringify(items));
-      return newItem;
+      return { success: true, data: newItem };
     }
   ),
   updateIncome: (id, data) => handle405Fallback(
     () => api.put(`/income/${id}`, data),
     () => {
       let items = JSON.parse(localStorage.getItem('fp_income') || '[]');
-      items = items.map(item => item.id === id ? { ...item, ...data } : item);
+      let updatedItem = null;
+      items = items.map(item => {
+        if (item.id === id) {
+          updatedItem = { ...item, ...data, amount: parseFloat(data.amount) };
+          return updatedItem;
+        }
+        return item;
+      });
       localStorage.setItem('fp_income', JSON.stringify(items));
-      return { id, ...data };
+      return { success: true, data: updatedItem };
     }
   ),
   deleteIncome: (id) => handle405Fallback(
@@ -163,36 +169,42 @@ export const expenseService = {
   getExpenses: () => handle405Fallback(
     () => api.get('/expenses'),
     () => {
-      const items = JSON.parse(localStorage.getItem('fp_expenses') || '[]');
+      let items = JSON.parse(localStorage.getItem('fp_expenses') || '[]');
       if (items.length === 0) {
-        const defaults = [
+        items = [
           { id: 'e1', title: 'Apartment Rent', category: 'Rent', amount: 1500, date: new Date().toISOString().slice(0, 10) },
           { id: 'e2', title: 'Grocery Shopping', category: 'Food', amount: 420, date: new Date().toISOString().slice(0, 10) },
           { id: 'e3', title: 'Electric Bill', category: 'Utilities', amount: 180, date: new Date().toISOString().slice(0, 10) }
         ];
-        localStorage.setItem('fp_expenses', JSON.stringify(defaults));
-        return defaults;
+        localStorage.setItem('fp_expenses', JSON.stringify(items));
       }
-      return items;
+      return { success: true, count: items.length, data: items };
     }
   ),
   createExpense: (data) => handle405Fallback(
     () => api.post('/expenses', data),
     () => {
       const items = JSON.parse(localStorage.getItem('fp_expenses') || '[]');
-      const newItem = { id: 'exp-' + Date.now(), ...data, created_at: new Date().toISOString() };
+      const newItem = { id: 'exp-' + Date.now(), ...data, amount: parseFloat(data.amount), created_at: new Date().toISOString() };
       items.unshift(newItem);
       localStorage.setItem('fp_expenses', JSON.stringify(items));
-      return newItem;
+      return { success: true, data: newItem };
     }
   ),
   updateExpense: (id, data) => handle405Fallback(
     () => api.put(`/expenses/${id}`, data),
     () => {
       let items = JSON.parse(localStorage.getItem('fp_expenses') || '[]');
-      items = items.map(item => item.id === id ? { ...item, ...data } : item);
+      let updatedItem = null;
+      items = items.map(item => {
+        if (item.id === id) {
+          updatedItem = { ...item, ...data, amount: parseFloat(data.amount) };
+          return updatedItem;
+        }
+        return item;
+      });
       localStorage.setItem('fp_expenses', JSON.stringify(items));
-      return { id, ...data };
+      return { success: true, data: updatedItem };
     }
   ),
   deleteExpense: (id) => handle405Fallback(
@@ -212,14 +224,15 @@ export const budgetService = {
     () => api.get(`/budget${month ? `?month=${month}` : ''}`),
     () => {
       const budget = JSON.parse(localStorage.getItem('fp_budget') || 'null');
-      return budget || { monthly_budget: 3500, month: new Date().toISOString().slice(0, 7) };
+      const data = budget || { monthly_budget: 3500, month: new Date().toISOString().slice(0, 7) };
+      return { success: true, data };
     }
   ),
   setBudget: (data) => handle405Fallback(
     () => api.post('/budget', data),
     () => {
       localStorage.setItem('fp_budget', JSON.stringify(data));
-      return data;
+      return { success: true, data };
     }
   )
 };
@@ -229,25 +242,32 @@ export const aiService = {
   analyze: (data = {}) => handle405Fallback(
     () => api.post('/ai/analyze', data),
     () => ({
-      healthScore: 88,
-      analysis: 'Your savings rate is strong at 65%. Your top spending category is Rent. Recommendation: Allocate 15% of your income to automated investments.',
-      insights: [
-        'Great job keeping food expenses under budget.',
-        'Rent accounts for 45% of total expenses.',
-        'Consider setting up an emergency fund with 3 months of expenses.'
-      ]
+      success: true,
+      data: {
+        healthScore: 88,
+        analysis: 'Your savings rate is strong at 65%. Your top spending category is Rent. Recommendation: Allocate 15% of your income to automated investments.',
+        insights: [
+          'Great job keeping food expenses under budget.',
+          'Rent accounts for 45% of total expenses.',
+          'Consider setting up an emergency fund with 3 months of expenses.'
+        ]
+      }
     })
   ),
   chat: (message) => handle405Fallback(
     () => api.post('/ai/chat', { message }),
     () => ({
-      reply: `FinancePilot AI Analysis: Based on your financial data, your cash flow is positive. You have safe discretionary spending buffer for this month.`
+      success: true,
+      data: {
+        reply: `FinancePilot AI Analysis: Based on your financial data, your cash flow is positive. You have safe discretionary spending buffer for this month.`
+      }
     })
   ),
   getReports: () => handle405Fallback(
     () => api.get('/ai/reports'),
     () => ({
-      reports: [
+      success: true,
+      data: [
         { id: 'rep-1', title: 'Monthly Financial Health Check', created_at: new Date().toISOString() }
       ]
     })
