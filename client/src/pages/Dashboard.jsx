@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { useCurrency } from '../context/CurrencyContext';
 import { incomeService, expenseService, budgetService, aiService } from '../services/api';
-import { formatCurrency, formatDate } from '../utils/formatters';
+import { formatDate } from '../utils/formatters';
 import Loader from '../components/common/Loader';
 import { 
   TrendingUp, 
@@ -22,6 +23,7 @@ import {
 const Dashboard = () => {
   const { user } = useAuth();
   const { addToast } = useToast();
+  const { formatCurrency } = useCurrency();
 
   const [loading, setLoading] = useState(true);
   const [incomes, setIncomes] = useState([]);
