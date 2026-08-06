@@ -1,0 +1,16 @@
+# Environment variables & database credentials
+.env
+.env.local
+.env.development
+.env.production
+*.env
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# System files
+.DS_Store

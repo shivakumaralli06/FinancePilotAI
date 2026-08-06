@@ -1,6 +1,6 @@
-# 🚀 FinancePilot AI - AI-Powered Personalized Finance Assistant
+# 🚀 FinancePilot AI - Production-Ready Financial Assistant
 
-"FinancePilot AI" is an enterprise-grade, full-stack SaaS financial co-pilot powered by **Google Gemini 2.5 AI SDK (`@google/genai`)**, **Supabase PostgreSQL**, **Node.js Express**, and **React + Vite + Tailwind CSS**.
+FinancePilot AI is an enterprise-grade, full-stack SaaS financial co-pilot powered by **Google Gemini AI SDK (`@google/genai`)**, **Supabase PostgreSQL**, **Node.js Express**, and **React + Vite + Tailwind CSS**.
 
 It empowers users to track income streams, categorize expenses, plan monthly budgets, visualize real-time Recharts analytics, calculate a dynamic Financial Health Score, receive personalized AI recommendations, and chat interactively with an AI Financial Advisor using their actual financial data.
 
@@ -30,6 +30,50 @@ It empowers users to track income streams, categorize expenses, plan monthly bud
 | **Database** | Supabase PostgreSQL, Row Level Security (RLS) |
 | **AI Engine** | Google Gemini AI (`@google/genai` Official SDK) |
 | **Deployment** | Vercel (Frontend), Render / Railway (Backend), Supabase (Database) |
+
+---
+
+## 📂 Project Folder Structure
+
+```
+.
+├── client/                     # React + Vite Frontend Application
+│   ├── public/                 # Static assets & favicons
+│   ├── src/
+│   │   ├── components/         # Reusable UI components (Navbar, Sidebar, Modals, Cards)
+│   │   ├── context/            # React Context API state management (AuthContext)
+│   │   ├── pages/              # View pages (Dashboard, Income, Expense, Analytics, AI Hub, Chat)
+│   │   ├── services/           # Axios HTTP service wrappers & API endpoints
+│   │   ├── App.jsx             # Root App Component with React Router routes
+│   │   ├── main.jsx            # React entry point
+│   │   └── index.css           # Tailwind CSS directives & global glassmorphism styles
+│   ├── .env.example            # Environment template for frontend
+│   ├── .gitignore              # Git ignore rules for frontend
+│   ├── package.json            # Frontend dependencies & build scripts
+│   ├── tailwind.config.js      # Tailwind CSS theme configuration
+│   └── vite.config.js          # Vite build & proxy settings
+│
+├── server/                     # Node.js + Express Backend API
+│   ├── config/                 # Supabase & Google Gemini AI SDK initializers
+│   ├── controllers/            # Controller business logic (Auth, Income, Expense, Budget, AI)
+│   ├── middleware/             # Express Middlewares (Auth JWT, Validation, Error Handler)
+│   ├── routes/                 # Express API router declarations
+│   ├── supabase/               # Database migration scripts & PostgreSQL migration runner
+│   ├── validators/             # Zod schema input validation
+│   ├── .env.example            # Environment template for backend
+│   ├── .gitignore              # Git ignore rules for backend
+│   ├── index.js                # Express Server entry point
+│   └── package.json            # Backend dependencies & npm scripts
+│
+├── supabase/                   # Supabase SQL Migrations
+│   └── migrations/
+│       └── 001_initial_schema.sql # PostgreSQL DDL Schema, RLS Policies, Seed Data
+│
+├── .gitignore                  # Global repository gitignore
+├── CONTRIBUTING.md             # Open source contribution guide
+├── LICENSE                     # MIT Open Source License
+└── README.md                   # Project Documentation
+```
 
 ---
 
@@ -84,55 +128,28 @@ CREATE TABLE ai_reports (
   report JSONB NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-
--- Row Level Security (RLS)
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE income ENABLE ROW LEVEL SECURITY;
-ALTER TABLE expenses ENABLE ROW LEVEL SECURITY;
-ALTER TABLE budgets ENABLE ROW LEVEL SECURITY;
-ALTER TABLE ai_reports ENABLE ROW LEVEL SECURITY;
 ```
-
----
-
-## 📡 Backend API Routes
-
-| Method | Endpoint | Description | Auth Required |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/auth/register` | Register new user account | No |
-| `POST` | `/api/auth/login` | Authenticate user & return JWT | No |
-| `GET` | `/api/profile` | Retrieve user profile | Yes |
-| `PUT` | `/api/profile` | Update user profile details | Yes |
-| `GET` | `/api/income` | Fetch all user income records | Yes |
-| `POST` | `/api/income` | Create new income entry | Yes |
-| `PUT` | `/api/income/:id` | Update existing income entry | Yes |
-| `DELETE` | `/api/income/:id` | Delete income entry | Yes |
-| `GET` | `/api/expenses` | Fetch all user expense records | Yes |
-| `POST` | `/api/expenses` | Create new expense record | Yes |
-| `PUT` | `/api/expenses/:id` | Update expense record | Yes |
-| `DELETE` | `/api/expenses/:id` | Delete expense record | Yes |
-| `GET` | `/api/budget` | Get monthly budget for specified month | Yes |
-| `POST` | `/api/budget` | Set or update monthly budget | Yes |
-| `POST` | `/api/ai/analyze` | Run Gemini AI analysis on user data | Yes |
-| `POST` | `/api/ai/chat` | Send message to AI Financial Co-Pilot | Yes |
-| `GET` | `/api/reports` | Fetch historical saved AI reports | Yes |
 
 ---
 
 ## ⚙️ Environment Variables
 
 ### Backend (`server/.env`)
+Create `server/.env` based on `server/.env.example`:
 ```env
 PORT=5000
 NODE_ENV=development
-JWT_SECRET=financepilot_super_secret_jwt_key_2026
+JWT_SECRET=your_jwt_secret_key_here
 SUPABASE_URL=https://your-supabase-project.supabase.co
 SUPABASE_ANON_KEY=your-supabase-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+SUPABASE_DB_PASSWORD=your-database-password
+DATABASE_URL=postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:6543/postgres?sslmode=require
 GOOGLE_API_KEY=your-google-gemini-api-key
 ```
 
 ### Frontend (`client/.env`)
+Create `client/.env` based on `client/.env.example`:
 ```env
 VITE_API_URL=/api
 ```
@@ -141,24 +158,28 @@ VITE_API_URL=/api
 
 ## 🚀 Quick Start Guide (Local Execution)
 
-### 1. Clone & Setup Backend
+### 1. Clone Repository & Setup Backend
 ```bash
-cd server
+git clone https://github.com/your-username/financepilot-ai.git
+cd financepilot-ai/server
 npm install
 ```
-Configure your environment variables in `server/.env` (including `DATABASE_URL` or `SUPABASE_URL` + `SUPABASE_DB_PASSWORD`). Then run the PostgreSQL migration script:
+
+Configure `server/.env` with your Supabase & Gemini credentials, then run the database migration runner:
 ```bash
 npm run db:migrate
 ```
-Start the development server:
+
+Start the backend Express server:
 ```bash
 npm run dev
 ```
-Backend server will start at `http://localhost:5000`.
+Backend API will start at `http://localhost:5000`.
 
-### 2. Setup Frontend
+### 2. Setup & Run Frontend
+In a new terminal window:
 ```bash
-cd client
+cd financepilot-ai/client
 npm install
 npm run dev
 ```
@@ -166,26 +187,36 @@ Frontend React app will launch at `http://localhost:3000`.
 
 ---
 
-## 🌐 Deployment Instructions
+## 📸 Screenshots & Visual Preview
 
-### Deploy Frontend to Vercel
-1. Push workspace to GitHub.
-2. Connect GitHub repository to Vercel.
-3. Set Build Settings:
-   - Root Directory: `client`
-   - Build Command: `npm run build`
-   - Output Directory: `dist`
-4. Configure Environment Variable `VITE_API_URL` pointing to your deployed backend URL.
-
-### Deploy Backend to Render
-1. Create a New Web Service on Render.
-2. Select repository and set Root Directory: `server`.
-3. Build Command: `npm install`
-4. Start Command: `node index.js`
-5. Configure environment variables (`JWT_SECRET`, `SUPABASE_URL`, `SUPABASE_KEY`, `GOOGLE_API_KEY`).
+| Dashboard Overview | AI Financial Advisor |
+| :---: | :---: |
+| *(Dashboard analytics, income vs expense graphs, and recent activity log)* | *(Gemini AI Health Score, tailored saving recommendations, and chat co-pilot)* |
 
 ---
 
-## 🏆 Hackathon Demo Account
-- **Demo Email**: `demo@financepilot.ai`
-- **Demo Password**: `password123`
+## 🌐 Deployment Instructions
+
+### Deploy Frontend to Vercel
+1. Connect your GitHub repository to Vercel.
+2. Select Root Directory: `client`.
+3. Set Build Command: `npm run build`, Output Directory: `dist`.
+4. Add Environment Variable `VITE_API_URL` pointing to your production backend API domain.
+
+### Deploy Backend to Render / Railway
+1. Create a New Web Service pointing to your repository.
+2. Root Directory: `server`.
+3. Build Command: `npm install`, Start Command: `node index.js`.
+4. Configure environment variables (`JWT_SECRET`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`, `GOOGLE_API_KEY`).
+
+---
+
+## 🤝 Open Source Contribution
+
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on submitting pull requests and reporting issues.
+
+---
+
+## 📜 License
+
+Distributed under the **MIT License**. See [LICENSE](LICENSE) for full details.
