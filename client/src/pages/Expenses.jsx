@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { expenseService } from '../services/api';
 import { useToast } from '../context/ToastContext';
-import { formatCurrency, formatDate } from '../utils/formatters';
+import { useCurrency } from '../context/CurrencyContext';
+import { formatDate } from '../utils/formatters';
 import { EXPENSE_CATEGORIES, CATEGORY_COLORS } from '../utils/constants';
 import Modal from '../components/common/Modal';
 import Loader from '../components/common/Loader';
@@ -18,6 +19,7 @@ import {
 
 const Expenses = () => {
   const { addToast } = useToast();
+  const { formatCurrency } = useCurrency();
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
 
