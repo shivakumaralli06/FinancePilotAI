@@ -60,6 +60,7 @@ app.get('/api/health', (req, res) => {
 
 // API Routes
 app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
 app.use('/api/income', incomeRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/budget', budgetRoutes);
@@ -67,6 +68,7 @@ app.use('/api/ai', aiRoutes);
 
 // Direct /api/profile endpoint support
 app.use('/api/profile', authRoutes);
+app.use('/profile', authRoutes);
 // Direct /api/reports endpoint support
 app.get('/api/reports', authMiddleware, getReports);
 
