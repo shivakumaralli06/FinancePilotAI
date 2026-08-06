@@ -8,7 +8,8 @@ import {
   User, 
   Sparkles, 
   Loader2, 
-  MessageSquare 
+  MessageSquare,
+  Mic
 } from 'lucide-react';
 
 const SUGGESTIONS = [
@@ -42,6 +43,22 @@ const AIChat = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages, sending]);
+
+  const handleMicClick = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'en-US';
+      recognition.onresult = (e) => {
+        const text = e.results[0][0].transcript;
+        setInputText(text);
+      };
+      recognition.start();
+      addToast('Listening for voice input...', 'info');
+    } else {
+      addToast('Speech recognition not supported in browser', 'error');
+    }
+  };
 
   const handleSend = async (messageText) => {
     const textToSend = messageText || inputText;
@@ -77,7 +94,7 @@ const AIChat = () => {
   };
 
   return (
-    <div className="h-[calc(100vh-7.5rem)] flex flex-col glass-card overflow-hidden">
+    <div className="h-[calc(100vh-8.5rem)] flex flex-col glass-card overflow-hidden">
       
       {/* Chat Header */}
       <div className="p-4 bg-slate-100/50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
@@ -161,6 +178,15 @@ const AIChat = () => {
           }}
           className="flex items-center gap-2"
         >
+          <button
+            type="button"
+            onClick={handleMicClick}
+            className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/20 text-slate-500 dark:text-slate-400 hover:text-emerald-500 border border-slate-200 dark:border-slate-700 transition-all"
+            title="Voice input dictation"
+          >
+            <Mic className="w-4 h-4 text-emerald-500" />
+          </button>
+
           <input
             type="text"
             placeholder="Ask FinancePilot AI anything about your money..."
