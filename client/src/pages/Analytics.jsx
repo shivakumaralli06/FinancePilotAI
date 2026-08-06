@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { incomeService, expenseService } from '../services/api';
 import { useToast } from '../context/ToastContext';
-import { formatCurrency } from '../utils/formatters';
+import { useCurrency } from '../context/CurrencyContext';
 import { CATEGORY_COLORS } from '../utils/constants';
 import Loader from '../components/common/Loader';
 import { 
@@ -28,6 +28,7 @@ import {
 
 const Analytics = () => {
   const { addToast } = useToast();
+  const { formatCurrency } = useCurrency();
   const [incomes, setIncomes] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
