@@ -35,7 +35,7 @@ const Register = () => {
       addToast('Account created successfully! Welcome to FinancePilot AI.', 'success');
       navigate('/dashboard');
     } catch (err) {
-      const msg = err.response?.data?.message || 'Registration failed. Please try again.';
+      const msg = err.response?.data?.message || err.message || 'Registration failed. Please try again.';
       setErrorMsg(msg);
       addToast(msg, 'error');
     } finally {
