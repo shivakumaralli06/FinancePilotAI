@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { budgetService, expenseService } from '../services/api';
 import { useToast } from '../context/ToastContext';
-import { formatCurrency, getCurrentMonth } from '../utils/formatters';
+import { useCurrency } from '../context/CurrencyContext';
+import { getCurrentMonth } from '../utils/formatters';
 import Loader from '../components/common/Loader';
 import Modal from '../components/common/Modal';
 import { 
@@ -16,6 +17,7 @@ import {
 
 const Budget = () => {
   const { addToast } = useToast();
+  const { formatCurrency } = useCurrency();
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
   const [budget, setBudget] = useState(null);
   const [expenses, setExpenses] = useState([]);
