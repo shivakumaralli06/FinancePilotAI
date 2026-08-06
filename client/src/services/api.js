@@ -40,13 +40,13 @@ api.interceptors.response.use(
   }
 );
 
-// Helper for handling 405 or network failures gracefully on static deployments (Vercel static host)
+// Helper for handling 404/405 or network failures gracefully on static deployments (Vercel static host)
 const handle405Fallback = async (apiCall, fallbackFn) => {
   try {
     return await apiCall();
   } catch (error) {
-    if (error.response?.status === 405 || !error.response) {
-      console.warn('⚠️ Server endpoint returned 405 or offline. Executing client demo fallback.');
+    if (error.response?.status === 405 || error.response?.status === 404 || !error.response) {
+      console.warn('⚠️ Server endpoint returned 404/405 or offline. Executing client demo fallback.');
       return { data: await fallbackFn() };
     }
     throw error;
