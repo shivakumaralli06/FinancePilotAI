@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useToast } from '../context/ToastContext';
+import { useCurrency } from '../context/CurrencyContext';
 import { 
   Settings as SettingsIcon, 
   Sun, 
@@ -14,7 +15,7 @@ import {
 const Settings = () => {
   const { isDark, toggleTheme } = useTheme();
   const { addToast } = useToast();
-  const [currency, setCurrency] = useState('USD ($)');
+  const { currency, changeCurrency } = useCurrency();
 
   const handleExportData = () => {
     addToast('Preparing financial CSV export bundle...', 'info');
@@ -78,15 +79,18 @@ const Settings = () => {
             <select
               value={currency}
               onChange={(e) => {
-                setCurrency(e.target.value);
-                addToast(`Currency set to ${e.target.value}`, 'success');
+                changeCurrency(e.target.value);
+                addToast(`Display currency changed to ${e.target.value}`, 'success');
               }}
-              className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-900 dark:text-white outline-none"
+              className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-900 dark:text-white outline-none cursor-pointer"
             >
               <option value="USD ($)">USD ($)</option>
+              <option value="INR (₹)">INR (₹)</option>
               <option value="EUR (€)">EUR (€)</option>
               <option value="GBP (£)">GBP (£)</option>
-              <option value="INR (₹)">INR (₹)</option>
+              <option value="JPY (¥)">JPY (¥)</option>
+              <option value="CAD ($)">CAD ($)</option>
+              <option value="AUD ($)">AUD ($)</option>
             </select>
           </div>
         </div>
