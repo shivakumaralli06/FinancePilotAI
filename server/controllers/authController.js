@@ -95,90 +95,160 @@ const login = async (req, res, next) => {
     const { email, password } = req.body;
     const lowerEmail = email.toLowerCase().trim();
 
+    let targetUser = null;
+
     if (isConfigured && supabase) {
-      const { data: user, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('email', lowerEmail)
-        .single();
+      try {
+        const { data: user, error } = await supabase
+          .from('users')
+          .select('*')
+          .eq('email', lowerEmail)
+          .maybeSingle();
 
-      if (error || !user) {
-        return res.status(401).json({
-          success: false,
-          message: 'Invalid email or password.'
-        });
-      }
-
-      const isMatch = await bcrypt.compare(password, user.password_hash);
-      if (!isMatch) {
-        return res.status(401).json({
-          success: false,
-          message: 'Invalid email or password.'
-        });
-      }
-
-      const token = generateToken(user.id, user.email, user.name);
-
-      return res.status(200).json({
-        success: true,
-        message: 'Login successful!',
-        token,
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          created_at: user.created_at
+        if (!error && user) {
+          targetUser = user;
         }
-      });
-    } else {
-      // In-Memory Fallback
-      let user = inMemoryDb.users.find(u => u.email === lowerEmail);
-      
+      } catch (dbErr) {
+        console.warn('⚠️ Supabase login query warning:', dbErr.message);
+      }
+    }
+
+    // Fallback to in-memory store if not found in Supabase
+    if (!targetUser) {
+      targetUser = inMemoryDb.users.find(u => u.email === lowerEmail);
+
       // Auto-create demo user if logging in with demo credentials
-      if (!user && (lowerEmail === 'demo@financepilot.ai' || lowerEmail === 'user@example.com')) {
+      if (!targetUser && (lowerEmail === 'demo@financepilot.ai' || lowerEmail === 'user@example.com')) {
         const salt = await bcrypt.genSalt(10);
         const password_hash = await bcrypt.hash('password123', salt);
         const id = uuidv4();
-        user = {
-          id,
-          name: 'Alex Morgan',
-          email: lowerEmail,
-          password_hash,
-          created_at: new Date().toISOString()
-        };
-        inMemoryDb.users.push(user);
+        const created_at = new Date().toISOString();
+        const name = lowerEmail === 'demo@financepilot.ai' ? 'Demo Account' : 'Example User';
+
+        targetUser = { id, name, email: lowerEmail, password_hash, created_at };
+        inMemoryDb.users.push(targetUser);
         seedInitialUserData(id);
       }
+    }
 
-      if (!user) {
-        return res.status(401).json({
-          success: false,
-          message: 'Invalid email or password. Use demo@financepilot.ai / password123 for demo.'
-        });
-      }
-
-      const isMatch = await bcrypt.compare(password, user.password_hash);
-      if (!isMatch && password !== 'password123') {
-        return res.status(401).json({
-          success: false,
-          message: 'Invalid email or password.'
-        });
-      }
-
-      const token = generateToken(user.id, user.email, user.name);
-
-      return res.status(200).json({
-        success: true,
-        message: 'Login successful!',
-        token,
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          created_at: user.created_at
-        }
+    if (!targetUser) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password.'
       });
     }
+
+    const isMatch = await bcrypt.compare(password, targetUser.password_hash);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password.'
+      });
+    }
+
+    const token = generateToken(targetUser.id, targetUser.email, targetUser.name);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Login successful!',
+      token,
+      user: {
+        id: targetUser.id,
+        name: targetUser.name,
+        email: targetUser.email,
+        created_at: targetUser.created_at
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// POST /api/auth/forgot-password
+const forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const lowerEmail = email.toLowerCase().trim();
+
+    let userExists = false;
+
+    if (isConfigured && supabase) {
+      const { data: user } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', lowerEmail)
+        .maybeSingle();
+
+      if (user) userExists = true;
+    }
+
+    if (!userExists) {
+      const memUser = inMemoryDb.users.find(u => u.email === lowerEmail);
+      if (memUser) userExists = true;
+    }
+
+    if (!userExists) {
+      return res.status(404).json({
+        success: false,
+        message: 'No account found with this email address.'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Password reset code sent successfully! Use verification code: 123456',
+      code: '123456'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// POST /api/auth/reset-password
+const resetPassword = async (req, res, next) => {
+  try {
+    const { email, code, newPassword } = req.body;
+    const lowerEmail = email.toLowerCase().trim();
+
+    if (code !== '123456') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired password reset verification code.'
+      });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const password_hash = await bcrypt.hash(newPassword, salt);
+
+    let updated = false;
+
+    if (isConfigured && supabase) {
+      const { error } = await supabase
+        .from('users')
+        .update({ password_hash })
+        .eq('email', lowerEmail);
+
+      if (!error) updated = true;
+    }
+
+    // Also update in-memory DB
+    const memUser = inMemoryDb.users.find(u => u.email === lowerEmail);
+    if (memUser) {
+      memUser.password_hash = password_hash;
+      updated = true;
+    }
+
+    if (!updated) {
+      return res.status(404).json({
+        success: false,
+        message: 'Account not found or password update failed.'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Password has been reset successfully! You can now log in with your new password.'
+    });
   } catch (error) {
     next(error);
   }
@@ -301,6 +371,8 @@ function seedInitialUserData(userId) {
 module.exports = {
   register,
   login,
+  forgotPassword,
+  resetPassword,
   getProfile,
   updateProfile
 };
