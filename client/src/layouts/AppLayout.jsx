@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import Navbar from '../components/common/Navbar';
 import Sidebar from '../components/common/Sidebar';
 import Footer from '../components/common/Footer';
+import VoiceAssistantButton from '../components/common/VoiceAssistantButton';
 
 const AppLayout = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -18,6 +19,7 @@ const AppLayout = () => {
         </main>
       </div>
 
+      <VoiceAssistantButton />
       <Footer />
     </div>
   );
