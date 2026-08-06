@@ -68,9 +68,21 @@ const aiChatSchema = z.object({
   message: z.string().min(1, 'Message cannot be empty')
 });
 
+const forgotPasswordSchema = z.object({
+  email: z.string().email('Please enter a valid email address')
+});
+
+const resetPasswordSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  code: z.string().min(1, 'Reset code is required'),
+  newPassword: z.string().min(6, 'Password must be at least 6 characters long')
+});
+
 module.exports = {
   registerSchema,
   loginSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
   incomeSchema,
   expenseSchema,
   budgetSchema,
