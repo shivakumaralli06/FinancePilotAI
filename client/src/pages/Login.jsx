@@ -29,7 +29,7 @@ const Login = () => {
       addToast('Welcome back to FinancePilot AI!', 'success');
       navigate('/dashboard');
     } catch (err) {
-      const msg = err.response?.data?.message || 'Login failed. Please verify your credentials.';
+      const msg = err.response?.data?.message || err.message || 'Login failed. Please verify your credentials.';
       setErrorMsg(msg);
       addToast(msg, 'error');
     } finally {
