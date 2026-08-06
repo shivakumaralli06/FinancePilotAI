@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider } from './context/ToastContext';
+import { CurrencyProvider } from './context/CurrencyContext';
 
 import PublicLayout from './layouts/PublicLayout';
 import AppLayout from './layouts/AppLayout';
@@ -26,9 +27,10 @@ import NotFound from './pages/NotFound';
 function App() {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <ToastProvider>
-          <BrowserRouter>
+      <CurrencyProvider>
+        <AuthProvider>
+          <ToastProvider>
+            <BrowserRouter>
             <Routes>
               {/* Public Routes */}
               <Route element={<PublicLayout />}>
@@ -60,7 +62,8 @@ function App() {
           </BrowserRouter>
         </ToastProvider>
       </AuthProvider>
-    </ThemeProvider>
+    </CurrencyProvider>
+  </ThemeProvider>
   );
 }
 
